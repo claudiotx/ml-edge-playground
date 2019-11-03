@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>ML in the Edge</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.10.0/css/tachyons.min.css" />
+  <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+  <script src="https://unpkg.com/@tensorflow-models/speech-commands"></script>
+  <script src="scripts/index.js"></script>
+</head>
+
+<body class="w-100 sans-serif">
+  <header class="w-100 pa3 ph5-ns bg-purple">
+    <div class="db dt-ns mw9 center w-100">
+      <div class="db dtc-ns v-mid tl w-50">
+        <a href="/" class="dib f5 f4-ns fw6 mt0 mb1 link white" title="Home">
+          Machine Learning @ Edge
+          <div class="dib">
+            <small class="nowrap f6 mt2 mt3-ns pr2 white fw2">Tensorflow.js</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="w-100 bt b--black-10 bg-white">
+    <div class="mw8 center pv4 ph3" id="dashboard">
+      <section class="flex-m flex-l nl3-m nr3-m nl3-l nr3-l">
+        <nav class="w-100 w-25-m w-25-l mb4 mb0-l ph3-m ph3-l">
+          <h2 class="ttu mt0 mb2 f6 fw5 silver">Menu</h2>
+          <ul class="list pl0 mt0 mb4">
+            <li class="mb2">
+              <a href="#" class="block link dim blue">Overview</a>
+            </li>
+          </ul>
+          <h2 class="ttu mt0 mb2 f6 fw5 silver">Advanced</h2>
+          <ul class="list pl0 mt0 mb2">
+            <li class="mb2">
+              <a href="#" class="block link dim blue">Toolkit Docs</a>
+            </li>
+          </ul>
+        </nav>
+        <article class="w-100 w-75-m w-75-l ph3-m ph3-l">
+          <header class="mb3">
+            <h2 class="ttu mt0 mb1 f6 fw5 silver">Machine Learning School</h2>
+          </header>
+          <hr class="o-20" />
+          <!-- Status -->
+          <article id="terminal" class="mw8 center br2 ba b--light-red bg-light-red">
+            <div class="dt-ns dt--fixed-ns w-100">
+              <div class="pa3 pa4-ns dtc-ns v-mid">
+                <div id="console"> Starting TensorFlow... </div>
+              </div>
+            </div>
+          </article>
+          <!-- Status -->
+          <div class="w-100 pt3">
+            <header class="">
+              <h2 class="ttu mt0 mb1 f6 fw5 silver">1. Sample Collection Stage</h2>
+            </header>
+            <hr class="o-20" />
+            <a id="left" onmousedown="collect(0)" onmouseup="collect(null)" href="#"
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
+              Left</a>
+            <a id="right" onmousedown="collect(1)" onmouseup="collect(null)" href="#"
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
+              Right</a>
+            <a id="noise" onmousedown="collect(2)" onmouseup="collect(null)" href="#"
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
+              Noise</a>
+          </div>
+          <div class="w-100 pt3">
+            <header class="">
+              <h2 class="ttu mt0 mb1 f6 fw5 silver">2. Training Stage</h2>
+            </header>
+            <hr class="o-20" />
+            <a id="train" onclick="train()" href="#"
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Train
+              Model</a>
+          </div>
+          <div class="w-100 pt3">
+            <header class="">
+              <h2 class="ttu mt0 mb1 f6 fw5 silver">3. Test Stage</h2>
+            </header>
+            <hr class="o-20" />
+            <a id="listen" onclick="listen()" href="#"
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Listen
+              Microphone</a>
+            <input type="range" id="output" min="0" max="10" step="0.1">
+          </div>
+
+        </article>
+      </section>
+    </div>
+  </main>
+</body>
+
+</html>
