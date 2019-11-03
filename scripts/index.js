@@ -1,11 +1,11 @@
 /**
-  Train a Model from Scratch
-  train() is called on click
-  Sequential Model (Layers of Data in Sequence)
+  Transfer Learning
+  Each instance of `base-recognizer` can be loaded with multiple transfer recognizers
  */
 
 // ------------------------------------------------
 // Globals
+let baseRecognizer;
 let recognizer;
 const NUM_FRAMES = 3;
 let examples = [];
@@ -14,159 +14,80 @@ let model;
 
 // ------------------------------------------------
 // Core Functions
-async function moveSlider(labelTensor) {
-  const label = (await labelTensor.data())[0];
-  document.getElementById('console').textContent = label;
-  if (label == 2) {
-    return;
-  }
-  let delta = 0.1;
-  const prevValue = +document.getElementById('output').value;
-  document.getElementById('output').value =
-    prevValue + (label === 0 ? -delta : delta);
+function updateConsole(txt) {
+  const textNode = document.createTextNode(txt);
+  const linebreak = document.createElement('br');
+  document.querySelector('#console').appendChild(textNode);
+  document.querySelector('#console').appendChild(linebreak);
+  var objDiv = document.querySelector("#console");
+  objDiv.scrollTop = objDiv.scrollHeight;
 }
 
-function listen() {
-  if (recognizer.isListening()) {
-    recognizer.stopListening();
-    toggleButtons(true);
-    document.getElementById('listen').textContent = 'Listen';
-    return;
-  }
-  toggleButtons(false);
-  document.getElementById('listen').textContent = 'Stop';
-  document.getElementById('listen').disabled = false;
-
-  recognizer.listen(async ({
-    spectrogram: {
-      frameSize,
-      data
-    }
-  }) => {
-    const vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
-    const input = tf.tensor(vals, [1, ...INPUT_SHAPE]);
-    const probs = model.predict(input);
-    const predLabel = probs.argMax(1);
-    await moveSlider(predLabel);
-    tf.dispose([input, probs, predLabel]);
-  }, {
-    overlapFactor: 0.999,
-    includeSpectrogram: true,
-    invokeCallbackOnNoiseAndUnknown: true
-  });
+function setReady() {
+  document.querySelector('#terminal').className = 'mw8 center br2 ba b--light-green bg-light-green';
+  updateConsole('ready!');
 }
 
-function normalize(x) {
-  const mean = -100;
-  const std = 10;
-  return x.map(x => (x - mean) / std);
+async function collectSamples(recognizer, name, count) {
+  for (let index = 0; index < count; index++) {
+    updateConsole(`Say ${name}, it: ${index+1}...`);
+    await recognizer.collectExample(name);
+  }
+  updateConsole('Ok Thanks');
 }
 
-function collect(label) {
-  console.log('Collecting samples...');
-  if (recognizer.isListening()) {
-    return recognizer.stopListening();
-  }
-  if (label == null) {
-    return;
-  }
-  recognizer.listen(async ({
-    spectrogram: {
-      frameSize,
-      data
-    }
-  }) => {
-    let vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
-    examples.push({
-      vals,
-      label
-    });
-    document.querySelector('#console').textContent =
-      `${examples.length} examples collected`;
-  }, {
-    overlapFactor: 0.999,
-    includeSpectrogram: true,
-    invokeCallbackOnNoiseAndUnknown: true
-  });
-}
-
-async function train() {
-  toggleButtons(false);
-  const ys = tf.oneHot(examples.map(e => e.label), 3);
-  const xsShape = [examples.length, ...INPUT_SHAPE];
-  const xs = tf.tensor(flatten(examples.map(e => e.vals)), xsShape);
-
-  await model.fit(xs, ys, {
-    batchSize: 16,
+async function createHelpTransferRecognizer() {
+  updateConsole('Creating Transfer Recognizer...');
+  const transferRecognizer = baseRecognizer.createTransfer('help'); // 1s
+  updateConsole(`TraCollecting Samples...`);
+  await collectSamples(transferRecognizer, 'help', 3);
+  await collectSamples(transferRecognizer, 'checkout', 3);
+  await collectSamples(transferRecognizer, '_background_noise_', 3);
+  const countExamples = transferRecognizer.countExamples();
+  const allExamplesKeys = Object.keys(countExamples);
+  const example1 = countExamples[allExamplesKeys[0]];
+  updateConsole(`Total Samples Collected ${example1}`);
+  updateConsole(`Training...`);
+  await transferRecognizer.train({
     epochs: 10,
-    callbacks: {
-      onEpochEnd: (epoch, logs) => {
-        document.querySelector('#console').textContent =
-          `Accuracy: ${(logs.acc * 100).toFixed(1)}% Epoch: ${epoch + 1}`;
+    callback: {
+      onEpochEnd: async (epoch, logs) => {
+        updateConsole(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
       }
     }
   });
-  tf.dispose([xs, ys]);
-  toggleButtons(true);
-}
-
-/*
-  Creates a Sequential Model
- */
-function buildModel() {
-  model = tf.sequential();
-  model.add(tf.layers.depthwiseConv2d({
-    depthMultiplier: 8,
-    kernelSize: [NUM_FRAMES, 3],
-    activation: 'relu',
-    inputShape: INPUT_SHAPE
-  }));
-  model.add(tf.layers.maxPooling2d({
-    poolSize: [1, 2],
-    strides: [2, 2]
-  }));
-  model.add(tf.layers.flatten());
-  model.add(tf.layers.dense({
-    units: 3,
-    activation: 'softmax'
-  }));
-  const optimizer = tf.train.adam(0.01);
-  model.compile({
-    optimizer,
-    loss: 'categoricalCrossentropy',
-    metrics: ['accuracy']
+  updateConsole(`Training finished.`);
+  updateConsole(`Listening..`);
+  await transferRecognizer.listen(result => {
+    let { scores } = result;
+    const words = transferRecognizer.wordLabels();
+    scoresList = Array.from(scores).map((s, i) => ({
+      score: s,
+      word: words[i]
+    }));
+    scoresList.sort((s1, s2) => s2.score - s1.score);
+    updateConsole('Highest Score:', scoresList[0].word, scoresList[0].score);
+  }, {
+    probabilityThreshold: 0.75
   });
-}
-
-function toggleButtons(enable) {
-  // document.querySelectorAll('a').forEach(b => a.disabled = !enable);
-}
-
-function flatten(tensors) {
-  const size = tensors[0].length;
-  const result = new Float32Array(tensors.length * size);
-  tensors.forEach((arr, i) => result.set(arr, i * size));
-  return result;
+  // Stop the recognition in 10 seconds.
+  setTimeout(() => {
+    transferRecognizer.stopListening();
+    updateConsole(`Stopped Listening.`);
+    updateConsole(`Terminated.`);
+  }, 10e3);
 }
 
 // ------------------------------------------------
 // Initializer Function
 function init() {
   console.log('Starting app...');
-
-  function setReady() {
-    document.querySelector('#terminal').className = 'mw8 center br2 ba b--light-green bg-light-green';
-    document.querySelector('#console').textContent = 'TensorFlow Ready';
-  }
-
-  // Entrypoint ===================================
   async function app() {
-    recognizer = speechCommands.create('BROWSER_FFT');
-    await recognizer.ensureModelLoaded();
+    baseRecognizer = speechCommands.create('BROWSER_FFT');
+    await baseRecognizer.ensureModelLoaded();
     setReady();
-    buildModel();
+    await createHelpTransferRecognizer();
   }
-
   app();
 }
 
@@ -175,3 +96,142 @@ document.addEventListener('readystatechange', function () {
     init();
   }
 });
+
+
+
+// Deprecated
+// Core Functions
+// async function moveSlider(labelTensor) {
+//   const label = (await labelTensor.data())[0];
+//   document.getElementById('console').textContent = label;
+//   if (label == 2) {
+//     return;
+//   }
+//   let delta = 0.1;
+//   const prevValue = +document.getElementById('output').value;
+//   document.getElementById('output').value =
+//     prevValue + (label === 0 ? -delta : delta);
+// }
+
+// function listen() {
+//   if (recognizer.isListening()) {
+//     recognizer.stopListening();
+//     toggleButtons(true);
+//     document.getElementById('listen').textContent = 'Listen';
+//     return;
+//   }
+//   toggleButtons(false);
+//   document.getElementById('listen').textContent = 'Stop';
+//   document.getElementById('listen').disabled = false;
+
+//   recognizer.listen(async ({
+//     spectrogram: {
+//       frameSize,
+//       data
+//     }
+//   }) => {
+//     const vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
+//     const input = tf.tensor(vals, [1, ...INPUT_SHAPE]);
+//     const probs = model.predict(input);
+//     const predLabel = probs.argMax(1);
+//     await moveSlider(predLabel);
+//     tf.dispose([input, probs, predLabel]);
+//   }, {
+//     overlapFactor: 0.999,
+//     includeSpectrogram: true,
+//     invokeCallbackOnNoiseAndUnknown: true
+//   });
+// }
+
+// function normalize(x) {
+//   const mean = -100;
+//   const std = 10;
+//   return x.map(x => (x - mean) / std);
+// }
+
+// function collect(label) {
+//   console.log('Collecting samples...');
+//   if (recognizer.isListening()) {
+//     return recognizer.stopListening();
+//   }
+//   if (label == null) {
+//     return;
+//   }
+//   recognizer.listen(async ({
+//     spectrogram: {
+//       frameSize,
+//       data
+//     }
+//   }) => {
+//     let vals = normalize(data.subarray(-frameSize * NUM_FRAMES));
+//     examples.push({
+//       vals,
+//       label
+//     });
+//     document.querySelector('#console').textContent =
+//       `${examples.length} examples collected`;
+//   }, {
+//     overlapFactor: 0.999,
+//     includeSpectrogram: true,
+//     invokeCallbackOnNoiseAndUnknown: true
+//   });
+// }
+
+// async function train() {
+//   toggleButtons(false);
+//   const ys = tf.oneHot(examples.map(e => e.label), 3);
+//   const xsShape = [examples.length, ...INPUT_SHAPE];
+//   const xs = tf.tensor(flatten(examples.map(e => e.vals)), xsShape);
+
+//   await model.fit(xs, ys, {
+//     batchSize: 16,
+//     epochs: 10,
+//     callbacks: {
+//       onEpochEnd: (epoch, logs) => {
+//         document.querySelector('#console').textContent =
+//           `Accuracy: ${(logs.acc * 100).toFixed(1)}% Epoch: ${epoch + 1}`;
+//       }
+//     }
+//   });
+//   tf.dispose([xs, ys]);
+//   toggleButtons(true);
+// }
+
+// /*
+//   Creates a Sequential Model
+//  */
+// function buildModel() {
+//   model = tf.sequential();
+//   model.add(tf.layers.depthwiseConv2d({
+//     depthMultiplier: 8,
+//     kernelSize: [NUM_FRAMES, 3],
+//     activation: 'relu',
+//     inputShape: INPUT_SHAPE
+//   }));
+//   model.add(tf.layers.maxPooling2d({
+//     poolSize: [1, 2],
+//     strides: [2, 2]
+//   }));
+//   model.add(tf.layers.flatten());
+//   model.add(tf.layers.dense({
+//     units: 3,
+//     activation: 'softmax'
+//   }));
+//   const optimizer = tf.train.adam(0.01);
+//   model.compile({
+//     optimizer,
+//     loss: 'categoricalCrossentropy',
+//     metrics: ['accuracy']
+//   });
+// }
+
+// function toggleButtons(enable) {
+//   // document.querySelectorAll('a').forEach(b => a.disabled = !enable);
+// }
+
+// function flatten(tensors) {
+//   const size = tensors[0].length;
+//   const result = new Float32Array(tensors.length * size);
+//   tensors.forEach((arr, i) => result.set(arr, i * size));
+//   return result;
+// }

@@ -7,6 +7,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.10.0/css/tachyons.min.css" />
+  <link rel="stylesheet" href="./styles/styles.css" />
   <script src="https://unpkg.com/@tensorflow/tfjs"></script>
   <script src="https://unpkg.com/@tensorflow-models/speech-commands"></script>
   <script src="scripts/index.js"></script>
@@ -61,7 +62,9 @@
               <h2 class="ttu mt0 mb1 f6 fw5 silver">1. Sample Collection Stage</h2>
             </header>
             <hr class="o-20" />
-            <a id="left" onmousedown="collect(0)" onmouseup="collect(null)" href="#"
+            <a id="reload" onClick="location.reload()" href="#"
+            class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Reload</a>
+            <!-- <a id="left" onmousedown="collect(0)" onmouseup="collect(null)" href="#"
               class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
               Left</a>
             <a id="right" onmousedown="collect(1)" onmouseup="collect(null)" href="#"
@@ -69,9 +72,9 @@
               Right</a>
             <a id="noise" onmousedown="collect(2)" onmouseup="collect(null)" href="#"
               class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
-              Noise</a>
+              Noise</a> -->
           </div>
-          <div class="w-100 pt3">
+          <!-- <div class="w-100 pt3">
             <header class="">
               <h2 class="ttu mt0 mb1 f6 fw5 silver">2. Training Stage</h2>
             </header>
@@ -89,7 +92,7 @@
               class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Listen
               Microphone</a>
             <input type="range" id="output" min="0" max="10" step="0.1">
-          </div>
+          </div> -->
 
         </article>
       </section>
