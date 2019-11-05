@@ -27,6 +27,16 @@
     </div>
   </header>
   <main class="w-100 bt b--black-10 bg-white">
+    <div id="help" class="help sans-serif absolute ct pa4 flex justify-center items-center hide">
+      <input type="checkbox" id="trigger" class="toggle-checked clip" />
+      <div class="toggle-target ba br3 bw b--black-10 pa4 shadow-4 bg-white w-100">
+          <div class="flex items-center">
+              <div class="w-50">           <img class="" alt="Frank Ocean Blonde Album Cover"
+                src="./assets/ws.png"> </div>
+              <div class="w-50"> <h1 class="f2 measure lh-title fw2 tr">How can I help you?</h1> </div>
+          </div>
+      </div>
+    </div>
     <div class="mw8 center pv4 ph3" id="dashboard">
       <section class="flex-m flex-l nl3-m nr3-m nl3-l nr3-l">
         <nav class="w-100 w-25-m w-25-l mb4 mb0-l ph3-m ph3-l">
@@ -63,37 +73,8 @@
             </header>
             <hr class="o-20" />
             <a id="reload" onClick="location.reload()" href="#"
-            class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Reload</a>
-            <!-- <a id="left" onmousedown="collect(0)" onmouseup="collect(null)" href="#"
-              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
-              Left</a>
-            <a id="right" onmousedown="collect(1)" onmouseup="collect(null)" href="#"
-              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
-              Right</a>
-            <a id="noise" onmousedown="collect(2)" onmouseup="collect(null)" href="#"
-              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Collect
-              Noise</a> -->
+              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Reload</a>
           </div>
-          <!-- <div class="w-100 pt3">
-            <header class="">
-              <h2 class="ttu mt0 mb1 f6 fw5 silver">2. Training Stage</h2>
-            </header>
-            <hr class="o-20" />
-            <a id="train" onclick="train()" href="#"
-              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Train
-              Model</a>
-          </div>
-          <div class="w-100 pt3">
-            <header class="">
-              <h2 class="ttu mt0 mb1 f6 fw5 silver">3. Test Stage</h2>
-            </header>
-            <hr class="o-20" />
-            <a id="listen" onclick="listen()" href="#"
-              class="no-underline fw5 mt3 br2 ph3 pv2 dib ba b--blue blue bg-white hover-bg-blue hover-white">Listen
-              Microphone</a>
-            <input type="range" id="output" min="0" max="10" step="0.1">
-          </div> -->
-
         </article>
       </section>
     </div>
