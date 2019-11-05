@@ -39,9 +39,16 @@ function downloadSamples(transferRecognizer) {
 };
 
 function showHelp() {
-  document.querySelector('#help').className = 'help sans-serif absolute ct pa4 flex justify-center items-center show';
+  document.querySelector('#help').className = 'w-50 sans-serif absolute ct pa4 flex justify-center items-center show';
   setTimeout(() => {
-    document.querySelector('#help').className = 'help sans-serif absolute ct pa4 flex justify-center items-center hide';
+    document.querySelector('#help').className = 'w-50 sans-serif absolute ct pa4 flex justify-center items-center hide';
+  }, 7e3);
+};
+
+function showQr() {
+  document.querySelector('#qr').className = 'w-50 sans-serif absolute ct pa4 flex justify-center items-center show';
+  setTimeout(() => {
+    document.querySelector('#qr').className = 'w-50 sans-serif absolute ct pa4 flex justify-center items-center hide';
   }, 7e3);
 };
 
@@ -67,7 +74,7 @@ async function createHelpTransferRecognizer() {
   // Collect Samples
   updateConsole(`Collecting Samples...`);
   await collectSamples(transferRecognizer, 'help', SAMPLES);
-  await collectSamples(transferRecognizer, 'checkout', SAMPLES);
+  await collectSamples(transferRecognizer, 'checkin', SAMPLES);
   await collectSamples(transferRecognizer, '_background_noise_', SAMPLES);
   const countExamples = transferRecognizer.countExamples();
   const allExamplesKeys = Object.keys(countExamples);
@@ -138,7 +145,6 @@ async function loadHelpTransferRecognizer() {
   // -------------------------------------------------------
   // Listen
   updateConsole(`Listening..`);
-  showHelp();
   await transferRecognizer.listen(result => {
     let { scores } = result;
     const words = transferRecognizer.wordLabels();
@@ -150,6 +156,9 @@ async function loadHelpTransferRecognizer() {
     updateConsole(`Highest Score: ${scoresList[0].word}, ${scoresList[0].score}`);
     if (scoresList[0].word === 'help') {
       showHelp();
+    }
+    if (scoresList[0].word === 'checkin') {
+      showQr();
     }
   }, {
     probabilityThreshold: 0.75
