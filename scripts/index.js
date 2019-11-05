@@ -8,7 +8,7 @@
 let baseRecognizer;
 let recognizer;
 const NUM_FRAMES = 3;
-const SAMPLES = 15;
+const SAMPLES = 10;
 let examples = [];
 const INPUT_SHAPE = [NUM_FRAMES, 232, 1];
 let model;
@@ -75,6 +75,10 @@ async function createHelpTransferRecognizer() {
   updateConsole(`Collecting Samples...`);
   await collectSamples(transferRecognizer, 'help', SAMPLES);
   await collectSamples(transferRecognizer, 'checkin', SAMPLES);
+  await collectSamples(transferRecognizer, 'xpto', SAMPLES);
+  await collectSamples(transferRecognizer, 'asyou', SAMPLES);
+  await collectSamples(transferRecognizer, 'see', SAMPLES);
+  await collectSamples(transferRecognizer, 'works', SAMPLES);
   await collectSamples(transferRecognizer, '_background_noise_', SAMPLES);
   const countExamples = transferRecognizer.countExamples();
   const allExamplesKeys = Object.keys(countExamples);
@@ -85,7 +89,7 @@ async function createHelpTransferRecognizer() {
   // Train
   updateConsole(`Training...`);
   await transferRecognizer.train({
-    epochs: 10,
+    epochs: 20,
     callback: {
       onEpochEnd: async (epoch, logs) => {
         updateConsole(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
@@ -133,7 +137,7 @@ async function loadHelpTransferRecognizer() {
   // Train
   updateConsole(`Training...`);
   await transferRecognizer.train({
-    epochs: 15,
+    epochs: 20,
     callback: {
       onEpochEnd: async (epoch, logs) => {
         updateConsole(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
