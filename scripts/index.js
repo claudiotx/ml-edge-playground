@@ -8,7 +8,7 @@
 let baseRecognizer;
 let recognizer;
 const NUM_FRAMES = 3;
-const SAMPLES = 1;
+const SAMPLES = 15;
 let examples = [];
 const INPUT_SHAPE = [NUM_FRAMES, 232, 1];
 let model;
@@ -133,7 +133,7 @@ async function loadHelpTransferRecognizer() {
   // Train
   updateConsole(`Training...`);
   await transferRecognizer.train({
-    epochs: 10,
+    epochs: 15,
     callback: {
       onEpochEnd: async (epoch, logs) => {
         updateConsole(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
@@ -161,7 +161,7 @@ async function loadHelpTransferRecognizer() {
       showQr();
     }
   }, {
-    probabilityThreshold: 0.75
+    probabilityThreshold: 0.90
   });
   // Stop the recognition in 10 seconds.
   setTimeout(() => {
