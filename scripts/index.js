@@ -8,7 +8,7 @@
 let baseRecognizer;
 let recognizer;
 const NUM_FRAMES = 3;
-const SAMPLES = 10;
+const SAMPLES = 5;
 let examples = [];
 const INPUT_SHAPE = [NUM_FRAMES, 232, 1];
 let model;
@@ -32,7 +32,7 @@ function setReady() {
 function downloadSamples(transferRecognizer) {
   const artifacts = transferRecognizer.serializeExamples();
   const anchor = document.createElement('a');
-  anchor.download = `samples.bin`;
+  anchor.download = `samples4.bin`;
   anchor.href = window.URL.createObjectURL(
       new Blob([artifacts], {type: 'application/octet-stream'}));
   anchor.click();
@@ -61,7 +61,7 @@ async function collectSamples(recognizer, name, count) {
 }
 
 async function loadSamplesBinaryArrayBuffer(transferRecognizer) {
-  const response = await fetch('samples/samples.bin');
+  const response = await fetch('samples/samples4.bin');
   const buffer = await response.arrayBuffer();
   transferRecognizer.loadExamples(buffer);
 }
@@ -75,10 +75,7 @@ async function createHelpTransferRecognizer() {
   updateConsole(`Collecting Samples...`);
   await collectSamples(transferRecognizer, 'help', SAMPLES);
   await collectSamples(transferRecognizer, 'checkin', SAMPLES);
-  await collectSamples(transferRecognizer, 'xpto', SAMPLES);
   await collectSamples(transferRecognizer, 'asyou', SAMPLES);
-  await collectSamples(transferRecognizer, 'see', SAMPLES);
-  await collectSamples(transferRecognizer, 'works', SAMPLES);
   await collectSamples(transferRecognizer, '_background_noise_', SAMPLES);
   const countExamples = transferRecognizer.countExamples();
   const allExamplesKeys = Object.keys(countExamples);
@@ -172,7 +169,7 @@ async function loadHelpTransferRecognizer() {
     transferRecognizer.stopListening();
     updateConsole(`Stopped Listening.`);
     updateConsole(`Terminated.`);
-  }, 60e3);
+  }, 480e3);
 }
 
 
@@ -185,8 +182,8 @@ function init() {
     baseRecognizer = speechCommands.create('BROWSER_FFT');
     await baseRecognizer.ensureModelLoaded();
     setReady();
-    // await createHelpTransferRecognizer();
-    await loadHelpTransferRecognizer();
+    await createHelpTransferRecognizer();
+    // await loadHelpTransferRecognizer();
   }
   app();
 }
